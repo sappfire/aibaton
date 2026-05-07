@@ -51,7 +51,8 @@ DRY_RUN=0
 SKIP_SMOKE=0
 SKIP_GIT_CHECK=0
 DIST_TAG="latest"
-REGISTRY="https://registry.npmjs.org/"
+REGISTRY=""              # empty = honor publishConfig in package.json
+REGISTRY_OVERRIDDEN=0
 EPHEMERAL_TOKEN=""
 NPMRC_BACKUP=""
 
@@ -65,8 +66,8 @@ while [ $# -gt 0 ]; do
     --skip-git-check) SKIP_GIT_CHECK=1; shift ;;
     --tag)            DIST_TAG="$2"; shift 2 ;;
     --tag=*)          DIST_TAG="${1#*=}"; shift ;;
-    --registry)       REGISTRY="$2"; shift 2 ;;
-    --registry=*)     REGISTRY="${1#*=}"; shift ;;
+    --registry)       REGISTRY="$2"; REGISTRY_OVERRIDDEN=1; shift 2 ;;
+    --registry=*)     REGISTRY="${1#*=}"; REGISTRY_OVERRIDDEN=1; shift ;;
     -h|--help)        sed -n '2,40p' "$0"; exit 0 ;;
     *)                echo "✗ unknown flag: $1" >&2; exit 1 ;;
   esac
@@ -121,6 +122,54 @@ step "preflight"
 PKG_NAME="$(node -p "require('./package.json').name")"
 PKG_VERSION="$(node -p "require('./package.json').version")"
 ok "package: $C_BOLD$PKG_NAME$C_RESET@$C_BOLD$PKG_VERSION$C_RESET"
+
+# Resolve effective registry (publishConfig wins over global default).
+# Order:
+#   1. --registry CLI flag (REGISTRY_OVERRIDDEN=1)
+#   2. publishConfig.registry in package.json
+#   3. global npm config get registry
+PKG_PUBLISH_REGISTRY="$(node -p "require('./package.json').publishConfig?.registry || ''")"
+if [ "$REGISTRY_OVERRIDDEN" -eq 1 ]; then
+  EFFECTIVE_REGISTRY="$REGISTRY"
+  REGISTRY_SOURCE="--registry CLI flag"
+elif [ -n "$PKG_PUBLISH_REGISTRY" ]; then
+  EFFECTIVE_REGISTRY="$PKG_PUBLISH_REGISTRY"
+  REGISTRY_SOURCE="package.json publishConfig.registry"
+else
+  EFFECTIVE_REGISTRY="$(npm config get registry 2>/dev/null || echo "https://registry.npmjs.org/")"
+  REGISTRY_SOURCE="npm config (global default)"
+fi
+# Normalize trailing slash for downstream comparisons.
+case "$EFFECTIVE_REGISTRY" in
+  */) ;;
+  *) EFFECTIVE_REGISTRY="${EFFECTIVE_REGISTRY}/" ;;
+esac
+REGISTRY="$EFFECTIVE_REGISTRY"  # downstream code uses $REGISTRY
+
+ok "target registry: $C_MAGENTA$REGISTRY$C_RESET"
+info "(source: $REGISTRY_SOURCE)"
+
+# Loud warning if package.json has no publishConfig.registry and the
+# resolved registry is anything other than npmjs.org. Almost always a
+# mistake when publishing a public open-source package.
+if [ -z "$PKG_PUBLISH_REGISTRY" ] && [ "$REGISTRY_OVERRIDDEN" -eq 0 ]; then
+  case "$REGISTRY" in
+    https://registry.npmjs.org/) ;;
+    *)
+      warn "package.json has no publishConfig.registry and your global"
+      warn "registry is NOT npmjs.org. About to publish to: $REGISTRY"
+      info "if this is a public open-source package, this is almost"
+      info "certainly wrong. Add to package.json:"
+      info '    "publishConfig": { "registry": "https://registry.npmjs.org/", "access": "public" }'
+      printf "  continue anyway? [y/N] "
+      read -r reply
+      case "$reply" in
+        y|Y|yes|YES) ;;
+        *) fail "aborted by user"; exit 4 ;;
+      esac
+      ;;
+  esac
+fi
 
 # Node version (>=18 per engines field)
 NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"

@@ -18,6 +18,47 @@ If you see `401 Unauthorized` or `403`, your token isn't configured — jump to 
 
 ---
 
+## Multi-registry safety (read this if you have a corp registry)
+
+You may have a personal npm account on `https://registry.npmjs.org/` *and* a work account on a corporate registry like `https://mirrors.tencent.com/npm/`. Without explicit guards, it's surprisingly easy to publish a personal project to your corp registry by accident.
+
+**aibaton's first line of defense is `package.json` → `publishConfig.registry`:**
+
+```json
+{
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  }
+}
+```
+
+This locks the publish target **at the project level**, regardless of:
+
+- what `npm config get registry` returns globally,
+- what's in your `~/.npmrc`,
+- whether you remember to pass `--registry`.
+
+It only affects `publish` — `npm install` still uses your fast corp mirror.
+
+**The publish.sh script reinforces this** by:
+
+1. Resolving the effective registry in this order: `--registry` flag → `publishConfig.registry` → global `npm config get registry`.
+2. Printing the resolved registry **and its source** loudly during preflight.
+3. Hard-blocking if `publishConfig` is missing AND the resolved registry is not npmjs.org (with an interactive confirm to override).
+
+**Recommendation for your other projects:**
+
+| Project type | `publishConfig.registry` |
+|---|---|
+| Open-source, going to npmjs.org | `https://registry.npmjs.org/` |
+| Internal Tencent project | `https://mirrors.tencent.com/npm/` (or whatever your tnpm endpoint is) |
+| Private @scope project | Whatever the scope's registry is |
+
+Once every project's `package.json` declares its target, **a misdirected publish becomes nearly impossible**.
+
+---
+
 ## When to publish
 
 - **Patch (0.2.0 → 0.2.1)**: bug fixes, doc-only changes, no behavior change.

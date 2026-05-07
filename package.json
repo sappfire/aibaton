@@ -32,6 +32,10 @@
   "bin": {
     "aibaton": "dist/cli.js"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "files": [
     "dist",
     "docs",
