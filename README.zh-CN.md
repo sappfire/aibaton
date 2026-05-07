@@ -4,9 +4,12 @@
 
 **用一条命令,把上下文从一个 AI 编程会话交接到下一个。**
 
-[![npm](https://img.shields.io/npm/v/aibaton.svg)](https://www.npmjs.com/package/aibaton)
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/aibaton.svg?color=cb3837&label=npm)](https://www.npmjs.com/package/aibaton)
+[![npm downloads](https://img.shields.io/npm/dm/aibaton.svg?color=cb3837)](https://www.npmjs.com/package/aibaton)
+[![GitHub stars](https://img.shields.io/github/stars/sappfire/aibaton?style=flat&color=yellow)](https://github.com/sappfire/aibaton/stargazers)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen.svg)](#环境要求)
+[![zero deps](https://img.shields.io/badge/dependencies-0-success.svg)](package.json)
 
 [English](./README.md) · 中文
 
