@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.env
+.env.*
+coverage/
+.baton/
+
+# Internal launch playbook with copy-paste social copy and reply scripts.
+# Not meant to be public.
+LAUNCH.md
+*.tgz

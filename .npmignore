@@ -1,0 +1,15 @@
+src/
+test/
+tsconfig.json
+.gitignore
+.npmignore
+node_modules/
+*.log
+.DS_Store
+.env
+.env.*
+coverage/
+.baton/
+.github/
+LAUNCH.md
+*.tgz

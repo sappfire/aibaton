@@ -1,0 +1,54 @@
+{
+  "name": "aibaton",
+  "version": "0.2.0",
+  "description": "Tiny CLI for handing off context between AI coding sessions. Per-task isolation, structured handover cards, zero cloud.",
+  "keywords": [
+    "ai",
+    "claude",
+    "claude-code",
+    "cursor",
+    "codex",
+    "aider",
+    "handoff",
+    "context",
+    "session",
+    "memory",
+    "cli",
+    "developer-tools"
+  ],
+  "homepage": "https://github.com/sappfire/aibaton",
+  "bugs": "https://github.com/sappfire/aibaton/issues",
+  "license": "MIT",
+  "author": "sappfire",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sappfire/aibaton.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "main": "dist/cli.js",
+  "bin": {
+    "aibaton": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "README.md",
+    "README.zh-CN.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "node --test test/*.test.js",
+    "start": "node dist/cli.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0"
+  }
+}
