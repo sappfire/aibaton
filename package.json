@@ -45,7 +45,11 @@
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build",
     "test": "node --test test/*.test.js",
-    "start": "node dist/cli.js"
+    "smoke": "bash test/smoke.sh",
+    "start": "node dist/cli.js",
+    "release": "bash scripts/publish.sh",
+    "release:dry": "bash scripts/publish.sh --dry-run",
+    "release:otp": "bash scripts/publish.sh --otp"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
